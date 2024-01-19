@@ -24,6 +24,8 @@ if [ "$local_train" = true ]; then
     Training_MC="--local_train 1"
 else
     pip install wandb
+    pip install optuna
+    pip install plotly
 
     DATA_DIR="--data_dir /work/MGANet/data"
     Base_model="--model_path  /mnt/mywork/all_backbones/checkpoint/densenet161_MGANet_Classification_03:55-21-12-2023.pth"
