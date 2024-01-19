@@ -1,1 +1,0 @@
-{"Current Training Epoch": 2, "Training IoU": 33.4173481464386, "Training Accuracy": 100.0, "_timestamp": 1705694738.5614522, "Testing Epoch": 2, "Current Testing IoU": 34.16543984413147, "Overall Best Testing Iou": 34.16543984413147, "Current Testing Accuracy": 36.25, "Best Testing Accuracy": 36.25, "_runtime": 519.7374670505524, "_step": 2, "_wandb": {"runtime": 518}}
