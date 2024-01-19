@@ -37,7 +37,7 @@ echo "Where training: $local_train"
 wandb login 1cb06a707195b3f9e5ce365622ce88ea92a4e601
 
 # Define the base command
-BASE_CMD="python -u Train.py --mmanet --max_epoch 3"
+BASE_CMD="python -u Train.py --mmanet --max_epoch 2"
 
 # Run the command based on the argument
 case $ARG in
