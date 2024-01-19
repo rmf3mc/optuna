@@ -11,7 +11,7 @@ def get_folder_path(args):
 
 
     if args.seg_ild:
-        path_parts.append(str(args.deform_expan))
+        path_parts.append(str(args.transfer_to))
         if args.unet:
             path_parts.append('Unet')
         else:

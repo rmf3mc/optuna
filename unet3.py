@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-
+import numpy as np
 
 class UNet3PlusDecoderLayerModule(nn.Module):
     def __init__(self, lvl,no_channels,no_classes):
@@ -71,7 +71,7 @@ class UNet3PlusDecoderLayerModule(nn.Module):
 
 
 
-def get_segmentation(decoder_layers,Encoder_outputs,Conv_Encoder_5):
+def get_segmentation(decoder_layers,Encoder_outputs,Conv_Encoder_5,added_channels):
 
     # Now Encoder_outputs contains the output of each layer
     #decoder_outputs = [self.feed_decoders(Encoder_outputs,self.decoder_layers[i]) for i in range(1,6)]
@@ -83,26 +83,26 @@ def get_segmentation(decoder_layers,Encoder_outputs,Conv_Encoder_5):
     #print('Conv_Encoder_5.shape',Conv_Encoder_5.shape)
     
     i=5
-    decoder_output_5= decoder_layers[str(i)](Encoder_outputs[i-1],Conv_Encoder_5)
+    decoder_output_5= decoder_layers[str(i)](Encoder_outputs[i-1],Conv_Encoder_5,added_channels[i-1])
     #print('decoder_output_5.shape',decoder_output_5.shape)
     
     #print(Encoder_outputs[3].shape,decoder_output_5.shape)
     i=4
-    decoder_output_4= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_5) 
+    decoder_output_4= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_5,added_channels[i-1]) 
               
     #print('decoder_output_4.shape',decoder_output_4.shape)
     
     i=3
-    decoder_output_3= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_4)
+    decoder_output_3= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_4,added_channels[i-1])
     #print('decoder_output_3.shape',decoder_output_3.shape)
     
     i=2
-    decoder_output_2= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_3) 
+    decoder_output_2= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_3,added_channels[i-1]) 
               
     #print('decoder_output_2.shape',decoder_output_2.shape)
     
     i=1
-    Final_seg= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_2)
+    Final_seg= decoder_layers[str(i)](Encoder_outputs[i-1],decoder_output_2,added_channels[i-1])
     #print('Final_seg',Final_seg.shape)
     
     return Final_seg,decoder_output_2,decoder_output_3,decoder_output_4,decoder_output_5
@@ -184,7 +184,7 @@ class UNetDecoderLayerModule2(nn.Module):
 
 
 class UNetDecoderLayerModule3(nn.Module):
-    def __init__(self, lvl,no_channels,no_classes=1,deform_expan=1):
+    def __init__(self, lvl,no_channels,no_classes=1,deform_expan=1,transform_to=0):
         super(UNetDecoderLayerModule3, self).__init__()
         self.layers= nn.ModuleDict()
         in_channels=no_channels[lvl-1]#*2
@@ -194,28 +194,42 @@ class UNetDecoderLayerModule3(nn.Module):
             out_channels=no_channels[lvl-2]
         
         print(f'i:{lvl},in_channels:{in_channels},out_channels:{out_channels}')
+        
+        channels_transfered_to=np.max((transform_to*deform_expan*in_channels,1),axis=0)
 
         if lvl !=1:
             self.layers[str(1)]=nn.Sequential(
                                 nn.Conv2d(in_channels=int(in_channels*(2+deform_expan)), out_channels=out_channels, kernel_size=3, padding=1),
-                                nn.ReLU(inplace=True),
-                                nn.Conv2d(out_channels, out_channels=out_channels, kernel_size=3, padding=1),
+                                nn.BatchNorm2d(out_channels),
+                                nn.ReLU(inplace=True))
+
+
+            self.layers[str(2)]=nn.Sequential(
+                                nn.Conv2d(out_channels+int(channels_transfered_to), out_channels=out_channels, kernel_size=3, padding=1),
+                                nn.BatchNorm2d(out_channels),
                                 nn.ReLU(inplace=True),
                                 nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
                                 )
         else:
             self.layers[str(1)]=nn.Sequential(
                         nn.Conv2d(in_channels=int(in_channels*(2+deform_expan)), out_channels=out_channels, kernel_size=3, padding=1),
-                        nn.ReLU(inplace=True),
-                        nn.Conv2d(out_channels, out_channels=out_channels, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(out_channels),
+                        nn.ReLU(inplace=True))
+
+            self.layers[str(2)]=nn.Sequential(
+                        nn.Conv2d(out_channels+int(channels_transfered_to), out_channels=out_channels, kernel_size=3, padding=1),
+                        nn.BatchNorm2d(out_channels),
                         nn.ReLU(inplace=True),
                         nn.Conv2d(out_channels, out_channels=no_classes, kernel_size=3, padding=1),
                         )
             
         
-    def forward (self,Enc_output,next_decoder_layer_output):
+    def forward (self,Enc_output,next_decoder_layer_output,skipped):
         concat=torch.cat([Enc_output, next_decoder_layer_output], 1)
         out=self.layers[str(1)](concat)
+        concat=torch.cat([out, skipped], 1)
+        out=self.layers[str(2)](concat)
+
         return out
 
 

@@ -1,0 +1,114 @@
+Initialized datatset with 800 images.
+Initialized datatset with 400 images.
+self.seg_included: True
+last 2208
+freeze layers:
+**********************************
+12
+0 torch.Size([1, 96, 112, 112])
+1 torch.Size([1, 96, 112, 112])
+2 torch.Size([1, 96, 112, 112])
+3 torch.Size([1, 96, 56, 56])
+4 torch.Size([1, 384, 56, 56])
+5 torch.Size([1, 192, 28, 28])
+6 torch.Size([1, 768, 28, 28])
+7 torch.Size([1, 384, 14, 14])
+8 torch.Size([1, 2112, 14, 14])
+9 torch.Size([1, 1056, 7, 7])
+10 torch.Size([1, 2208, 7, 7])
+11 torch.Size([1, 2208, 7, 7])
+************************
+Down sample at [0, 3, 5, 7, 9]
+Number of out channels [96, 384, 768, 2112, 2208]
+From_Layer:0 to_Layer:2
+From_Layer:3 to_Layer:4
+From_Layer:5 to_Layer:6
+From_Layer:7 to_Layer:8
+From_Layer:9 to_End
+********************
+[32m[I 2024-01-19 13:01:44,390][39m A new study created in RDB with name: Study_database
+0.125 0.0625 0.25 0.25 0.125
+i:1,in_channels:96,out_channels:96
+i:2,in_channels:384,out_channels:96
+i:3,in_channels:768,out_channels:384
+i:4,in_channels:2112,out_channels:768
+i:5,in_channels:2208,out_channels:2112
+Loading weights
+Total parameters in the model: 438.227483
+Epoch: 0
+[33m[W 2024-01-19 13:01:49,085][39m Trial 0 failed with parameters: {'deconv_layers_3_no_channels': 0.125, 'deconv_layers_5_no_channels': 0.0625, 'atrous_conv_layers_2_no_channels': 0.25, 'atrous_conv_layers_3_no_channels': 0.25, 'max_min_expan_layers_no_channels': 0.125} because of the following error: RuntimeError('Given groups=1, weight of size [2112, 2112, 3, 3], expected input[8, 3906, 14, 14] to have 2112 channels, but got 3906 channels instead').
+Traceback (most recent call last):
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/_optimize.py", line 200, in _run_trial
+    value_or_values = func(trial)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py", line 284, in objective
+    iou,train_acc,train_ce_loss= train_epoch_Seg(epoch)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py", line 348, in train_epoch_Seg
+    outputs = model(inputs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/parallel/data_parallel.py", line 166, in forward
+    return self.module(*inputs[0], **kwargs[0])
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/backboneModels.py", line 242, in forward
+    outputs['Final_seg'], outputs['decoder_layer_2'], outputs['decoder_layer_3'], outputs['decoder_layer_4'], outputs['decoder_layer_5']=get_segmentation(self.decoder_layers,Encoder_outputs,Conv_Encoder_5,added_channels)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/unet3.py", line 86, in get_segmentation
+    decoder_output_5= decoder_layers[str(i)](Encoder_outputs[i-1],Conv_Encoder_5,added_channels[i-1])
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/unet3.py", line 227, in forward
+    out=self.layers[str(2)](concat)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/container.py", line 139, in forward
+    input = module(input)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 457, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 453, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Given groups=1, weight of size [2112, 2112, 3, 3], expected input[8, 3906, 14, 14] to have 2112 channels, but got 3906 channels instead
+[33m[W 2024-01-19 13:01:49,102][39m Trial 0 failed with value None.
+Traceback (most recent call last):
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py", line 509, in <module>
+    study.optimize(objective, n_trials=2, timeout=None,  callbacks=[print_callback])
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/study.py", line 451, in optimize
+    _optimize(
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/_optimize.py", line 66, in _optimize
+    _optimize_sequential(
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/_optimize.py", line 163, in _optimize_sequential
+    frozen_trial = _run_trial(study, func, catch)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/_optimize.py", line 251, in _run_trial
+    raise func_err
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/optuna/study/_optimize.py", line 200, in _run_trial
+    value_or_values = func(trial)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py", line 284, in objective
+    iou,train_acc,train_ce_loss= train_epoch_Seg(epoch)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py", line 348, in train_epoch_Seg
+    outputs = model(inputs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/parallel/data_parallel.py", line 166, in forward
+    return self.module(*inputs[0], **kwargs[0])
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/backboneModels.py", line 242, in forward
+    outputs['Final_seg'], outputs['decoder_layer_2'], outputs['decoder_layer_3'], outputs['decoder_layer_4'], outputs['decoder_layer_5']=get_segmentation(self.decoder_layers,Encoder_outputs,Conv_Encoder_5,added_channels)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/unet3.py", line 86, in get_segmentation
+    decoder_output_5= decoder_layers[str(i)](Encoder_outputs[i-1],Conv_Encoder_5,added_channels[i-1])
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/unet3.py", line 227, in forward
+    out=self.layers[str(2)](concat)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/container.py", line 139, in forward
+    input = module(input)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 457, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/pupil/rmf3mc/.conda/envs/UnetCRF2/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 453, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Given groups=1, weight of size [2112, 2112, 3, 3], expected input[8, 3906, 14, 14] to have 2112 channels, but got 3906 channels instead

@@ -24,7 +24,7 @@ print('Importingggg backbonesssssssss\n')
 
 
 class MMANET(nn.Module):
-    def __init__ (self,trial, num_classes,MANet=False,MMANet=True,mask_guided=False,seg_included=None,freeze_all=False,no_sig_classes=1,Unet=True,deform_expan=1):
+    def __init__ (self,trial, num_classes,MANet=False,MMANet=True,mask_guided=False,seg_included=None,freeze_all=False,no_sig_classes=1,Unet=True,transform_to=0):
         super(MMANET, self).__init__()
         backbone_name='densenet161'
         self.MANet=MANet
@@ -37,15 +37,9 @@ class MMANET(nn.Module):
         self.no_classes=no_sig_classes
         self.freeze_all=freeze_all
 
-        self.deform_expan=deform_expan
         
-        print('2222222222self.seg_included:',self.seg_included)
-        print('Hena 1')
-        print('Hena 1')
-        print('Hena 1\n')
-        print('Hena 1\n')
+        print('self.seg_included:',self.seg_included)
 
-        print(f'Ha el backbone:{backbone_name}\n')
 
         if backbone_name[:-3]=='densenet':          
             self.features=DensenetEncoder(backbone_name, num_classes)         
@@ -108,20 +102,27 @@ class MMANET(nn.Module):
             all_out_channels=one+two+three+four+five
             print(one,two,three,four,five)
 
-            for i in range(1,6):
+            self.one=one
+            self.two=two
+            self.three=three
+            self.four=four
+            self.five=five
 
+            self.tranformers=nn.ModuleDict()
+
+
+            for i in range(1,6):
+                sum_of_current_channels=0
 
                 self.deconv_layers_3_no_channels= int(one*no_outputs_ch[i-1])
                 self.deconv_layers_5_no_channels= int(two*no_outputs_ch[i-1])
 
-
                 self.atrous_conv_layers_2_no_channels= int(three*no_outputs_ch[i-1])
                 self.atrous_conv_layers_3_no_channels= int(four*no_outputs_ch[i-1])
    
-
                 self.max_min_expan_layers_no_channels=int(five*no_outputs_ch[i-1])
 
-
+                sum_of_current_channels=self.deconv_layers_3_no_channels+self.deconv_layers_5_no_channels+self.atrous_conv_layers_2_no_channels+self.atrous_conv_layers_3_no_channels+self.max_min_expan_layers_no_channels
 
 
                 self.deconv_layers_3[str(i)]= Deform_Conv(in_channels=no_outputs_ch[i-1], out_channels=self.deconv_layers_3_no_channels, kernel_size=3)
@@ -130,13 +131,14 @@ class MMANET(nn.Module):
                 self.atrous_conv_layers_2[str(i)]= nn.Conv2d(in_channels=no_outputs_ch[i-1], out_channels=self.atrous_conv_layers_2_no_channels, kernel_size=3, dilation=2, padding=2)
                 self.atrous_conv_layers_3[str(i)]= nn.Conv2d(in_channels=no_outputs_ch[i-1], out_channels=self.atrous_conv_layers_3_no_channels, kernel_size=3, dilation=3, padding=3)
 
-
                 self.max_min_expan_layers[str(i)]= nn.Conv2d(2,out_channels=self.max_min_expan_layers_no_channels,kernel_size=1)
 
 
+                channels_transfered_to=np.max((sum_of_current_channels*transform_to,1),axis=0)
+                self.tranformers[str(i)]=nn.Conv2d(sum_of_current_channels,int(channels_transfered_to),kernel_size=1)
+
+
             shape=no_outputs_ch[-1]
-            print('all_out_channels',all_out_channels)
-            print(f'El shape:{shape},kol el channels:{all_out_channels}')
             self.center=nn.Conv2d(int(shape*(1+all_out_channels)), shape, kernel_size=3, padding=1).to('cuda')
             self.center2=nn.Conv2d(shape, shape, kernel_size=3, padding=1).to('cuda')
 
@@ -146,8 +148,7 @@ class MMANET(nn.Module):
             
             if self.Unet:
                 for i in range(1,6):
-                    self.decoder_layers[str(i)]=UNetDecoderLayerModule3(lvl=i,no_channels=no_outputs_ch,no_classes=self.no_classes,deform_expan=all_out_channels)
-                    #self.decoder_layers[str(i)]=UNetDecoderLayerModule(lvl=i,no_channels=no_outputs_ch,no_classes=self.no_classes)
+                    self.decoder_layers[str(i)]=UNetDecoderLayerModule3(lvl=i,no_channels=no_outputs_ch,no_classes=self.no_classes,deform_expan=all_out_channels,transform_to=transform_to)
             else:
                 for i in range(1,6):
                     self.decoder_layers[str(i)]=UNet3PlusDecoderLayerModule(lvl=i,no_channels=no_outputs_ch,no_classes=self.no_classes)
@@ -234,12 +235,12 @@ class MMANET(nn.Module):
             
             
         if self.seg_included:
-            Encoder_outputs = self.get_encoder_ops(x)
+            Encoder_outputs,added_channels = self.get_encoder_ops(x)
             Encoder_5=Encoder_outputs[4]
             #print('El mothm:',Encoder_5.shape)
             Conv_Encoder_5=self.center(Encoder_5)
             Conv_Encoder_5=self.center2(Conv_Encoder_5)
-            outputs['Final_seg'], outputs['decoder_layer_2'], outputs['decoder_layer_3'], outputs['decoder_layer_4'], outputs['decoder_layer_5']=get_segmentation(self.decoder_layers,Encoder_outputs,Conv_Encoder_5)
+            outputs['Final_seg'], outputs['decoder_layer_2'], outputs['decoder_layer_3'], outputs['decoder_layer_4'], outputs['decoder_layer_5']=get_segmentation(self.decoder_layers,Encoder_outputs,Conv_Encoder_5,added_channels)
             outputs['decoder_layer_2'], outputs['decoder_layer_3'], outputs['decoder_layer_4'], outputs['decoder_layer_5'] = torch.mean(outputs['decoder_layer_2'] ,dim=1).unsqueeze(1), torch.mean(outputs['decoder_layer_3'] ,dim=1).unsqueeze(1), torch.mean(outputs['decoder_layer_4'] ,dim=1).unsqueeze(1), torch.mean(outputs['decoder_layer_5'] ,dim=1).unsqueeze(1)
             
             
@@ -248,6 +249,7 @@ class MMANET(nn.Module):
 
     def get_encoder_ops(self,x):
         Encoder_outputs=[]
+        added_channels=[]
 
         for i in range(1,6):
             x = self.Encoders[str(i)](x)
@@ -264,16 +266,18 @@ class MMANET(nn.Module):
 
 
             mean_max_expan=self.max_min_expan_layers[str(i)](mean_max)
+            added_channels_=torch.cat((deform_3,deform_5,atrous_2,atrous_3,mean_max_expan),dim=1)
+
+            features=torch.cat((x,added_channels_),dim=1)
 
 
-            features=torch.cat((x,deform_3,deform_5,atrous_2,atrous_3,mean_max_expan),dim=1)
-            # print(deform_3.shape,deform_5.shape,atrous_2.shape,atrous_3.shape,mean_max_expan.shape)
+            added_channels_=self.tranformers[str(i)](added_channels_)
 
-            # print('al2ot el shapes',x.shape, features.shape)
             Encoder_outputs.append(features)
+            added_channels.append(added_channels_)
 
 
-        return Encoder_outputs
+        return Encoder_outputs, added_channels
 
 
 class Deform_Conv(nn.Module):

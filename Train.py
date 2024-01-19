@@ -4,7 +4,7 @@
 # In[1]:
 
 
-print('**Code Starting Optunaaaaaaaaaaa222222222**')
+print('**Code Starting Optuna Nautilusss**')
 
 import torch
 import torch.nn as nn
@@ -91,8 +91,7 @@ parser.add_argument('--model_path', type=str, help='The pretrained model path')
 parser.add_argument('--fsds', action='store_true', help='Using Full-scale Deep Supervision')
 
 parser.add_argument('--local_train', default= 0 , type=int, help='local_training')
-
-
+parser.add_argument('--transfer_to', default= 0 , type=float, help='transfer_to')
 
 # Use parse_known_args()
 args, unknown = parser.parse_known_args()
@@ -155,9 +154,9 @@ if cls_ild and not(seg_ild):
 
 elif seg_ild and not (cls_ild):
     if args.unet:
-        train_type=os.path.join(args.dataset+'-results-seg','Unet')
+        train_type=os.path.join('optuna',args.dataset+'-results-seg','Unet')
     else:
-        train_type=os.path.join(args.dataset+'-results-seg','3PlusUnet')
+        train_type=os.path.join('optuna',args.dataset+'-results-seg','3PlusUnet')
 
 else:
     if args.unet:
@@ -184,9 +183,15 @@ if not os.path.exists(models_folder):
 # In[ ]:
 
 
+import wandb
+
+
+# In[ ]:
+
+
 train = Leafvein(args,crop=[448,448],hflip=True,vflip=False,erase=False,mode='train')
 test = Leafvein(args,crop=[448,448],mode='test')
-model_path= f'{current_working_directory}/checkpoint/{name}_{formatted_datetime}.pth'
+model_path= f'{current_working_directory}/optuna/checkpoint/{name}_{formatted_datetime}.pth'
 
 
 # In[ ]:
@@ -211,9 +216,45 @@ Best_test_acc_BOT=0
 
 def objective(trial):
     start = time.time()
+    
+    # Assuming args is already defined with attributes transfer_to_FSDS, transfer_to, and fsds
+    group = str(args.transfer_to)+'_FSDS' if args.fsds else str(args.transfer_to)
+
+    run=wandb.init(
+        # set the wandb project where this run will be logged
+        project="icip24-optuna",
+        entity="ramytrm",
+        group=group,
+
+        # track hyperparameters and run metadata
+        config={
+        "learning_rate": args.lr,
+        "backbone_class": args.backbone_class,
+        "dataset": args.dataset,
+        "Max epochs": args.max_epoch,
+        "Segmentation Training":args.seg_ild,
+        "Classification Training":args.cls_ild,
+        "freeze_all": args.freeze_all,
+        "manet": args.manet,
+        "mmanet": args.mmanet,
+        "maskguided": args.maskguided,
+        "unet": args.unet,
+        "transfer_to": args.transfer_to,
+        "fsds": args.fsds,
+        "local_train": args.local_train
+        }
+    )
+    
+    
     global model, trainloader, testloader, optimizer
-    # Generate the model.
-    model=MMANET(trial,num_classes=num_classes,MANet=MANet,MMANet=MMANet,mask_guided=mask_guided,seg_included=seg_ild,freeze_all=freeze_all,Unet=args.unet,deform_expan=args.deform_expan)
+    model=MMANET(trial,num_classes=num_classes,MANet=MANet,MMANet=MMANet,mask_guided=mask_guided,seg_included=seg_ild,freeze_all=freeze_all,Unet=args.unet,transform_to=args.transfer_to)
+    
+    run.config.deconv_3_no_ch=model.one
+    run.config.deconv_5_no_ch=model.two
+    run.config.atrous_2_no_ch=model.three
+    run.config.atrous_3_no_ch=model.four
+    run.config.max_mean_no_ch=model.five
+    
     
     print('Loading weights')
     model_path= args.model_path
@@ -226,6 +267,10 @@ def objective(trial):
     
     total_params = sum(p.numel() for p in model.parameters())
     print(f"Total parameters in the model: {total_params/1e+6}")
+    run.config.model_no_paras=total_params/1e+6
+    
+
+    
     
     
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=5e-4)
@@ -237,7 +282,7 @@ def objective(trial):
     
 
     # Training of the model.
-    for epoch in range(10):
+    for epoch in range(args.max_epoch):
         start = time.time()        
         iou,train_acc,train_ce_loss= train_epoch_Seg(epoch)
         curr_test_iou,test_acc,test_ce_loss=test_epoch_Seg(epoch)
@@ -251,7 +296,8 @@ def objective(trial):
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
-
+    
+    run.finish()
     return curr_test_iou
 
 
@@ -266,7 +312,6 @@ def train_epoch_Seg(epoch):
     
     global new_size, model, trainloader, optimizer
    
-    
     model.train()
     if freeze_all and not(cls_ild):
     
@@ -347,6 +392,9 @@ def train_epoch_Seg(epoch):
     
     print(f'Acc: {accuracy:.3f}% ({correct}/{total})| CE: {train_ce_loss:.4f}| Total Loss: {train_loss:.4f}| IoU :{averageIoU:.4f}')
     
+    wandb.log({"Current Training Epoch": epoch,
+               "Training IoU": averageIoU,
+               "Training Accuracy":accuracy},step=epoch)
     train_total_losses.append(train_loss)
     train_iou.append(averageIoU)
     return averageIoU,accuracy,train_ce_loss
@@ -435,6 +483,12 @@ def test_epoch_Seg(epoch):
     print(f'Acc: {accuracy:.3f}% ({correct}/{total})| CE: {test_ce_loss:.4f}|  Total Loss: {test_loss:.4f}| IoU :{averageIoU:.4f}')
     print('cur_iou:{0},best_iou:{1}:'.format(averageIoU,best_iou))
     print('curr_Acc:{0},best_Acc:{1}:'.format(accuracy,best_acc))
+    
+    wandb.log({"Testing Epoch": epoch,
+               "Current Testing IoU": averageIoU,
+               "Overall Best Testing Iou":best_iou,
+               "Current Testing Accuracy":accuracy,
+               "Best Testing Accuracy": best_acc},step=epoch)
              
 
     return averageIoU,accuracy,test_ce_loss
@@ -452,7 +506,8 @@ def print_callback(study, trial):
 
 
 sampler = optuna.samplers.TPESampler(seed=1)
-study = optuna.create_study(study_name='test', storage='sqlite:///testingggg.db',
+db_file_path = os.path.join(folder_path, 'study_database.db')
+study = optuna.create_study(study_name='Study_database', storage=f'sqlite:///{db_file_path}',
                             direction="maximize", sampler=sampler)
 study.optimize(objective, n_trials=2, timeout=None,  callbacks=[print_callback])
 
@@ -488,31 +543,26 @@ import optuna
 # Your Optuna code here (e.g., defining the study and optimizing it)
 # ...
 
-# Get the current working directory
-current_directory = os.getcwd()
 
 # Visualization and saving plots as HTML files in the current directory
 fig_hist = optuna.visualization.plot_optimization_history(study)
-fig_hist.write_html(os.path.join(current_directory, "optuna_history.html"))
+fig_hist.write_html(os.path.join(folder_path, "optuna_history.html"))
 
 fig_importance = optuna.visualization.plot_param_importances(study)
-fig_importance.write_html(os.path.join(current_directory, "optuna_importance.html"))
+fig_importance.write_html(os.path.join(folder_path, "optuna_importance.html"))
 
 fig_edf = optuna.visualization.plot_edf([study])
-fig_edf.write_html(os.path.join(current_directory, "optuna_edf.html"))
+fig_edf.write_html(os.path.join(folder_path, "optuna_edf.html"))
 
 fig_inter = optuna.visualization.plot_intermediate_values(study)
-fig_inter.write_html(os.path.join(current_directory, "optuna_inter.html"))
+fig_inter.write_html(os.path.join(folder_path, "optuna_inter.html"))
 
 fig_relation = optuna.visualization.plot_parallel_coordinate(study)
-fig_relation.write_html(os.path.join(current_directory, "optuna_relation.html"))
+fig_relation.write_html(os.path.join(folder_path, "optuna_relation.html"))
 
-# Uncomment the following lines if you need to use plot_pareto_front
-# fig_pareto = optuna.visualization.plot_pareto_front(study)
-# fig_pareto.write_html(os.path.join(current_directory, "optuna_pareto.html"))
 
 fig_slice = optuna.visualization.plot_slice(study)
-fig_slice.write_html(os.path.join(current_directory, "optuna_slice.html"))
+fig_slice.write_html(os.path.join(folder_path, "optuna_slice.html"))
 
 
 # In[ ]:

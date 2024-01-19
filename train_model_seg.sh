@@ -37,29 +37,50 @@ echo "Where training: $local_train"
 wandb login 1cb06a707195b3f9e5ce365622ce88ea92a4e601
 
 # Define the base command
-BASE_CMD="python -u Train.py --mmanet --max_epoch 200"
+BASE_CMD="python -u Train.py --mmanet --max_epoch 3"
 
 # Run the command based on the argument
 case $ARG in
 
     1)
-        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model  --deform_expan 1.50 --unet $Training_MC
+        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --unet $Training_MC  --transfer_to 0
         ;;
 
  
     2)
-        $BASE_CMD    --fsds    --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --deform_expan 1.50 --unet $Training_MC
+        $BASE_CMD    --fsds    --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model    --unet $Training_MC  --transfer_to 0
+
         ;;
 
     3)
-        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model  --deform_expan 2.00 --unet $Training_MC
+        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --unet $Training_MC  --transfer_to 0.125 
         ;;
 
  
     4)
-        $BASE_CMD       --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --deform_expan 1.00  $Training_MC
+        $BASE_CMD    --fsds    --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model    --unet $Training_MC  --transfer_to 0.125
+
         ;;
-    
+
+    5)
+        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --unet $Training_MC  --transfer_to 0.250 
+        ;;
+
+ 
+    6)
+        $BASE_CMD    --fsds    --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model    --unet $Training_MC  --transfer_to 0.250 
+        ;;
+
+
+    7)
+        $BASE_CMD              --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model   --unet $Training_MC  --transfer_to 0.50 
+        ;;
+
+ 
+    8)
+        $BASE_CMD    --fsds    --seg_ild --freeze_all --dataparallel $DATA_DIR      --backbone_class  $model  $Base_model    --unet $Training_MC  --transfer_to 0.50 
+        ;;
+
  
 
     *)

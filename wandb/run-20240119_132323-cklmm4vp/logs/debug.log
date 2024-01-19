@@ -1,0 +1,39 @@
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Current SDK version is 0.16.2
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Configure stats pid to 3985392
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Loading settings from /home/pupil/rmf3mc/.config/wandb/settings
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Loading settings from /home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/wandb/settings
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'Train.py', 'program_abspath': '/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py', 'program': '/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/Train.py'}
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:_log_setup():526] Logging user logs to /home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/wandb/run-20240119_132323-cklmm4vp/logs/debug.log
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:_log_setup():527] Logging internal logs to /home/pupil/rmf3mc/Documents/ModelProposing/MGANet/optuna_Final/wandb/run-20240119_132323-cklmm4vp/logs/debug-internal.log
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:init():566] calling init triggers
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:init():573] wandb.init called with sweep_config: {}
+config: {'learning_rate': 0.05, 'backbone_class': 'densenet161', 'dataset': 'soybean_2_1', 'Max epochs': 3, 'Segmentation Training': True, 'Classification Training': False, 'freeze_all': True, 'manet': False, 'mmanet': True, 'maskguided': False, 'unet': True, 'transfer_to': 0.0, 'fsds': False, 'local_train': 1}
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:init():616] starting backend
+2024-01-19 13:23:23,835 INFO    MainThread:3985392 [wandb_init.py:init():620] setting up manager
+2024-01-19 13:23:23,836 INFO    MainThread:3985392 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-01-19 13:23:23,837 INFO    MainThread:3985392 [wandb_init.py:init():628] backend started and connected
+2024-01-19 13:23:23,840 INFO    MainThread:3985392 [wandb_init.py:init():720] updated telemetry
+2024-01-19 13:23:23,842 INFO    MainThread:3985392 [wandb_init.py:init():753] communicating run to backend with 90.0 second timeout
+2024-01-19 13:23:24,075 INFO    MainThread:3985392 [wandb_run.py:_on_init():2254] communicating current version
+2024-01-19 13:23:24,168 INFO    MainThread:3985392 [wandb_run.py:_on_init():2263] got version response 
+2024-01-19 13:23:24,168 INFO    MainThread:3985392 [wandb_init.py:init():804] starting run threads in backend
+2024-01-19 13:23:28,299 INFO    MainThread:3985392 [wandb_run.py:_console_start():2233] atexit reg
+2024-01-19 13:23:28,299 INFO    MainThread:3985392 [wandb_run.py:_redirect():2088] redirect: wrap_raw
+2024-01-19 13:23:28,299 INFO    MainThread:3985392 [wandb_run.py:_redirect():2153] Wrapping output streams.
+2024-01-19 13:23:28,299 INFO    MainThread:3985392 [wandb_run.py:_redirect():2178] Redirects installed.
+2024-01-19 13:23:28,299 INFO    MainThread:3985392 [wandb_init.py:init():847] run started, returning control to user process
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set deconv_3_no_ch = 0.125 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb deconv_3_no_ch 0.125 None
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set deconv_5_no_ch = 0.0625 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb deconv_5_no_ch 0.0625 None
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set atrous_2_no_ch = 0.25 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb atrous_2_no_ch 0.25 None
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set atrous_3_no_ch = 0.25 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb atrous_3_no_ch 0.25 None
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set max_mean_no_ch = 0.125 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,500 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb max_mean_no_ch 0.125 None
+2024-01-19 13:23:35,762 INFO    MainThread:3985392 [wandb_config.py:__setitem__():151] config set model_no_paras = 438.263116 - <bound method Run._config_callback of <wandb.sdk.wandb_run.Run object at 0x7f78634bd480>>
+2024-01-19 13:23:35,762 INFO    MainThread:3985392 [wandb_run.py:_config_callback():1342] config_cb model_no_paras 438.263116 None
+2024-01-19 13:27:43,929 WARNING MsgRouterThr:3985392 [router.py:message_loop():77] message_loop has been closed
