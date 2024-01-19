@@ -509,7 +509,7 @@ sampler = optuna.samplers.TPESampler(seed=1)
 db_file_path = os.path.join(folder_path, 'study_database.db')
 study = optuna.create_study(study_name='Study_database', storage=f'sqlite:///{db_file_path}',
                             direction="maximize", sampler=sampler)
-study.optimize(objective, n_trials=2, timeout=None,  callbacks=[print_callback])
+study.optimize(objective, n_trials=3, timeout=None,  callbacks=[print_callback])
 
 pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
 complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
