@@ -216,7 +216,7 @@ def objective(trial):
     model=MMANET(trial,num_classes=num_classes,MANet=MANet,MMANet=MMANet,mask_guided=mask_guided,seg_included=seg_ild,freeze_all=freeze_all,Unet=args.unet,deform_expan=args.deform_expan)
     
     print('Loading weights')
-    model_path= '/home/pupil/rmf3mc/Documents/ModelProposing/MGANet/FinalTouches_AMP/checkpoint/file.pth'
+    model_path= args.model_path
     model_dict = torch.load(model_path)
     state_dict = model_dict['net'] 
     model.load_state_dict(state_dict, strict=False)
